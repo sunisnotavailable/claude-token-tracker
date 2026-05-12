@@ -64,9 +64,7 @@ def proxy(path):
 
         def generate():
             nonlocal input_tokens, output_tokens, model_name
-            buffer = b""
             for chunk in resp.iter_content(chunk_size=None):
-                buffer += chunk
                 yield chunk
                 # Try to extract token info from each chunk
                 try:
@@ -100,19 +98,21 @@ def proxy(path):
                 log_usage(model=model_name, input_tok=input_tokens, output_tok=output_tokens)
                 print(f"[LOG·stream] {model_name} | in={input_tokens} out={output_tokens}", flush=True)
 
-        excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]
-        response_headers = {k: v for k, v in resp.headers.items() if k.lower() not in excluded_headers}
-
+        response_headers = _filter_headers(resp.headers)
         return Response(generate(), status=resp.status_code, headers=response_headers)
 
     # Non-streaming response — parse JSON directly
     body = resp.content
     _log_from_body(body)
 
-    excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]
-    response_headers = {k: v for k, v in resp.headers.items() if k.lower() not in excluded_headers}
+    response_headers = _filter_headers(resp.headers)
 
     return Response(body, status=resp.status_code, headers=response_headers)
+
+
+def _filter_headers(headers):
+    excluded = {"content-encoding", "content-length", "transfer-encoding", "connection"}
+    return {k: v for k, v in headers.items() if k.lower() not in excluded}
 
 
 def _log_from_body(body):
