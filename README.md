@@ -1,5 +1,7 @@
 # Token Dashboard
 
+[中文文档](README_CN.md)
+
 A lightweight tool that tracks your Claude Code token usage in real time — without touching your code.
 
 It runs a local HTTP proxy between Claude Code and your API endpoint, silently logs every call to SQLite, and lets you check usage via a terminal command or a Streamlit web dashboard.
